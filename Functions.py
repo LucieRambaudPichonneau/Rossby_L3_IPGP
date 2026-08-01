@@ -12,7 +12,7 @@ def beta0(s_i, s_o):
     # Quand beta est lineaire, dbeta_ds=beta0 
     # Calcul au rayon s moyen
     s_mean = (s_i + s_o) / 2
-    beta0 = (-(s_o**2 + s_mean**2) + s_mean) / (s_o**2 - s_mean**2)**2
+    beta0 = (-(s_o**2 + s_mean**2)) / (s_o**2 - s_mean**2)**2
     return beta0
     
 def beta(s, s_o):
@@ -22,7 +22,7 @@ def beta(s, s_o):
 
 def dbeta_ds(s, s_o):
     s = s[1:-1]
-    dbeta_ds = (-(s_o**2 + s**2) + s) / (s_o**2 - s**2)**2
+    dbeta_ds = (-(s_o**2 + s**2)) / (s_o**2 - s**2)**2
     return dbeta_ds
 
 def AB3(s, m, N, beta): 
