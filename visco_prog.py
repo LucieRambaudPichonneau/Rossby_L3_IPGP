@@ -6,10 +6,21 @@ s_i = 4  # rayon interne couche fluide
 s_o = 5  # rayon externe couche fluide
 N = 500  # resolution
 s = np.linspace(s_i, s_o, N)  # definition grille
-Ek = 10*(-6) #nombre d'Ekman
+Ek = 10**(-6) #nombre d'Ekman
 
 m_array = np.arange(1, 51, 1)
 n = 5  # nombre onde radial (nombre eigenvectors/values)
+
+'''
+fig, ax = plt.subplots(1,1,figsize = (10, 7))
+psi_test = np.zeros(len(s))
+for i,sl in enumerate(s):
+    psi = (sl-s_i)**2*(sl-s_o)**2
+    psi_test[i]=psi
+
+ax.plot(s,psi_test)
+plt.show()
+'''
 
 fig, ax2 = plt.subplots(1, 1, figsize=(10, 7))
 y = np.zeros((len(m_array), n))
@@ -30,7 +41,7 @@ ax2.grid(True, which="both", linestyle='--', alpha=0.5)
 ax2.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
 
 fig.tight_layout()
-fig.savefig("comparaison_beta_non_lineaire_visco.pdf", bbox_inches='tight')
+#fig.savefig("comparaison_beta_non_lineaire_visco.pdf", bbox_inches='tight')
 
 # Plot 2D pour m=1,10,20,30 et n=1 --> solution sphérique
 N_phi = 512
@@ -44,8 +55,8 @@ fig.suptitle(r'2D Eigenmodes (spherical $\beta$)', fontsize=18)
 axflat = ax.flatten()
 
 for i, m_val in enumerate(np.array([1, 10, 20, 30])):
-    A = f.A(f.beta(s, s_o), f.dbeta(s, s_o), f.ddbeta(s,s_o), f.dddbeta(s, s_o), m, s, N, Ek)
-    B = f.B(f.beta(s, s_o), f.dbeta(s, s_o), m, s, N)
+    A = f.A(f.beta(s, s_o), f.dbeta(s, s_o), f.ddbeta(s,s_o), f.dddbeta(s, s_o), m_val, s, N, Ek)
+    B = f.B(f.beta(s, s_o), f.dbeta(s, s_o), m_val, s, N)
     eigenvalues, eigenvectors = f.eigvalues_reg(A, B, N, n)
     psi = np.real(np.outer(eigenvectors[:, 0], np.exp(1j * m_val * phi))) 
     
@@ -61,4 +72,6 @@ for i, m_val in enumerate(np.array([1, 10, 20, 30])):
     axflat[i].set_yticks([])
 
 fig.tight_layout()
-fig.savefig("donuts_spheriques_visco.png", dpi=300, bbox_inches='tight')
+#fig.savefig("donuts_spheriques_visco.png", dpi=300, bbox_inches='tight')
+
+plt.show()

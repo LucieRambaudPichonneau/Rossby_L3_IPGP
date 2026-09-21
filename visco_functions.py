@@ -15,8 +15,8 @@ def A(beta,dbeta,ddbeta,dddbeta,m,s,N,Ek):
     D4 = sp.diags([uivv4,uiv4,ui4,uiv4,uivv4], offsets=[-2,-1,0,1,2], format = 'csc')
 
     #matrice derivee troisieme
-    uiv3 = np.ones(N-3, -2*Ek / 2*ds**3)
-    uivv3 = np.ones(N-4, Ek / 2*ds**3)
+    uiv3 = np.full(N-3, -2*Ek / (2*ds**3))
+    uivv3 = np.full(N-4, Ek / (2*ds**3))
     D3 = sp.diags([uivv3,uiv3,-uiv3,-uivv3],offsets=[-2,-1,1,2], format = 'csc')
     fact3 = sp.diags([2 /s[1:-1]+beta], offsets=[0], format = 'csc')
     D3 = fact3 @ D3 
@@ -29,7 +29,7 @@ def A(beta,dbeta,ddbeta,dddbeta,m,s,N,Ek):
     D2 = fact2 @ D2
 
     #matrice derivee premiere 
-    uiv1 = np.full(N-3, -Ek / 2*ds)
+    uiv1 = np.full(N-3, -Ek / (2*ds))
     D1 = sp.diags([uiv1,-uiv1], offsets = [-1,1], format = 'csc')
     fact1 = sp.diags([ddbeta + 2*dbeta/s[1:-1] - beta*m**2/s[1:-1]**2 + beta/s[1:-1]**2],offsets = [0], format = 'csc')
     D1 = fact1 @ D1
