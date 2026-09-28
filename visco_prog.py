@@ -7,41 +7,20 @@ s_o = 5  # rayon externe couche fluide
 N = 500  # resolution
 s = np.linspace(s_i, s_o, N)  # definition grille
 Ek = 10**(-6) #nombre d'Ekman
+f_df = [0.0407,0.0138,0.0070,0.0042,0.0028] #les 5 premiers modes obtenus sans dissipation (m=1)
 
 m_array = np.arange(1, 51, 1)
 n = 5  # nombre onde radial (nombre eigenvectors/values)
+m=1
+v0 = np.ones(N-2, dtype=complex)
+fig, ax = plt.subplots(1, 1, figsize=(10,7))
+A = f.A(f.beta(s, s_o), f.dbeta(s, s_o), f.ddbeta(s,s_o), f.dddbeta(s, s_o), m, s, N, Ek)  # sans l'approx sur beta
+B = f.B(f.beta(s, s_o), f.dbeta(s, s_o), m, s, N)
+eigenvalues, eigenvectors = f.eigvalues_shift_invert(A, B,f_df,n, N, v0, k=2)
 
-'''
-fig, ax = plt.subplots(1,1,figsize = (10, 7))
-psi_test = np.zeros(len(s))
-for i,sl in enumerate(s):
-    psi = (sl-s_i)**2*(sl-s_o)**2
-    psi_test[i]=psi
-
-ax.plot(s,psi_test)
-plt.show()
-'''
-
-fig, ax2 = plt.subplots(1, 1, figsize=(10, 7))
-y = np.zeros((len(m_array), n))
-for i, m in enumerate(m_array):
-    A = f.A(f.beta(s, s_o), f.dbeta(s, s_o), f.ddbeta(s,s_o), f.dddbeta(s, s_o), m, s, N, Ek)  # sans l'approx sur beta
-    B = f.B(f.beta(s, s_o), f.dbeta(s, s_o), m, s, N)
-    eigenvalues, eigenvectors = f.eigvalues_reg(A, B, N, n)
-    y[i, :] = np.abs(eigenvalues.real)
-    
 for k in range(1, n + 1):
-    ax2.scatter(m_array, y[:, k-1], marker='x', label=r'$n={}$'.format(k))
-    
-ax2.set_title(r'Dispertion relation (spherical $\beta$)')
-ax2.set_yscale('log')
-ax2.set_xlabel(r'Azimuthal wave number $m$')
-ax2.set_ylabel(r'Angular frequency f')
-ax2.grid(True, which="both", linestyle='--', alpha=0.5)
-ax2.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-
-fig.tight_layout()
-#fig.savefig("comparaison_beta_non_lineaire_visco.pdf", bbox_inches='tight')
+    ax.plot(s,eigenvectors[:, k-1].real,label=r'$n={}$ numerical'.format(k))
+ax.legend()
 
 # Plot 2D pour m=1,10,20,30 et n=1 --> solution sphérique
 N_phi = 512
@@ -55,10 +34,10 @@ fig.suptitle(r'2D Eigenmodes (spherical $\beta$)', fontsize=18)
 axflat = ax.flatten()
 
 for i, m_val in enumerate(np.array([1, 10, 20, 30])):
-    A = f.A(f.beta(s, s_o), f.dbeta(s, s_o), f.ddbeta(s,s_o), f.dddbeta(s, s_o), m_val, s, N, Ek)
+    A = f.A(f.beta(s, s_o), f.dbeta(s, s_o), f.ddbeta(s,s_o), f.dddbeta(s, s_o), m_val, s, N, Ek)  # sans l'approx sur beta
     B = f.B(f.beta(s, s_o), f.dbeta(s, s_o), m_val, s, N)
-    eigenvalues, eigenvectors = f.eigvalues_reg(A, B, N, n)
-    psi = np.real(np.outer(eigenvectors[:, 0], np.exp(1j * m_val * phi))) 
+    eigenvalues, eigenvectors = f.eigvalues_shift_invert(A, B,f_df,n, N,v0, k=2)
+    psi =np.real(np.outer(eigenvectors[:, 0], np.exp(1j * m_val * phi))) 
     
     axflat[i].contourf(x_grid, y_grid, psi, levels=15, cmap='RdBu_r')
     axflat[i].set_title(r'$m={}$'.format(m_val))
@@ -72,6 +51,6 @@ for i, m_val in enumerate(np.array([1, 10, 20, 30])):
     axflat[i].set_yticks([])
 
 fig.tight_layout()
-#fig.savefig("donuts_spheriques_visco.png", dpi=300, bbox_inches='tight')
+fig.savefig("donuts_spheriques.png", dpi=300, bbox_inches='tight')
 
 plt.show()
