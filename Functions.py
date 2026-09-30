@@ -225,3 +225,13 @@ def error2(m, n, s_i, s_o, beta0, puls_bessel, powers=range(3, 11)):
     
     slope = np.polyfit(np.log10(N_array), np.log10(eps), 1)[0]
     return N_array, eps, slope
+
+def f_wo_visco(m,n,s,N,beta,geom,dbeta=None):
+    if geom=='lin':
+        A,B=AB3(s,m,N,beta=beta)
+        eigenvalues, eigenvectors = eigvalues_reg(A,B,N,n)
+    if geom=='sph':
+        A,B=AB4(s, m, N, beta=beta, dbeta_ds=dbeta)
+        eigenvalues, eigenvectors = eigvalues_reg(A,B,N,n)
+    return eigenvalues
+        
