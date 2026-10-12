@@ -71,7 +71,7 @@ def A2(s, m, N, beta0, Ek):
     bce2 = sp.csc_array(bce2.reshape(1,-1))
 
     D2 = sp.vstack([bci2, D2[1:-1,:], bce2], format = 'csc')      
-    fact2 = sp.diags([(2*beta0*s[1:-1]/s[1:-1] + 3*beta0 - (2*m**2+1)/s[1:-1]**2) * 1j*Ek], offsets=[0], format='csc')
+    fact2 = sp.diags([(5*beta0 - (2*m**2+1)/s[1:-1]**2) * 1j*Ek], offsets=[0], format='csc')
     D2 = fact2 @ D2    
 
     
@@ -90,12 +90,12 @@ def A2(s, m, N, beta0, Ek):
     bce1 = sp.csc_array(bce1.reshape(1,-1))
 
     D1 = sp.vstack([bci1, D1[1:-1,:], bce1], format = 'csc')
-    fact1 = sp.diags([(-beta0*s[1:-1]*(m**2+1)/s[1:-1]**2 + 4*beta0/s[1:-1] + (2*m**2+1)/s[1:-1]**3) * 1j*Ek],offsets=[0], format='csc')
+    fact1 = sp.diags([(beta0/s[1:-1] * (3-m**2) + (2*m**2+1)/s[1:-1]**3) * 1j*Ek],offsets=[0], format='csc')
     D1 = fact1 @ D1
     
 
     #matrice non derivee
-    ui = (1j*Ek * (beta0*s[1:-1]*(1-m**2)/s[1:-1]**3 - beta0*(m**2+1)/s[1:-1]**2 + (m**4-4*m**2)/s[1:-1]**4) + 2/s[1:-1]*beta0*s[1:-1]*m)
+    ui = (1j*Ek * (-2*beta0*(m**2)/s[1:-1]**2 + (m**4-4*m**2)/s[1:-1]**4) + 2/s[1:-1]*beta0*s[1:-1]*m)
     D = sp.diags([ui],offsets=[0], format = 'csc')
 
     A = D4 + D3 + D2 + D1 + D

@@ -7,7 +7,7 @@ s_i = 4  # rayon interne couche fluide
 s_o = 5  # rayon externe couche fluide
 N = 500  # resolution
 s = np.linspace(s_i, s_o, N)  # definition grille
-Ek = 0 #nombre d'Ekman
+Ek = 10**-4 #nombre d'Ekman
 
 m_array = np.arange(1, 51, 1)
 n = 5  # nombre onde radial (nombre eigenvectors/values)
