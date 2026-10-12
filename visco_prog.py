@@ -7,7 +7,7 @@ s_i = 4  # rayon interne couche fluide
 s_o = 5  # rayon externe couche fluide
 N = 500  # resolution
 s = np.linspace(s_i, s_o, N)  # definition grille
-Ek = 10**(-4) #nombre d'Ekman
+Ek = 0 #nombre d'Ekman
 
 m_array = np.arange(1, 51, 1)
 n = 5  # nombre onde radial (nombre eigenvectors/values)
@@ -59,7 +59,7 @@ y2 = np.empty((len(m_array),n))
 for i, m in enumerate(m_array): #avec visco_functions
     A = f2.A(f2.beta(s, s_o), f2.dbeta(s, s_o), f2.ddbeta(s,s_o), f2.dddbeta(s, s_o), m, s, N, Ek)
     B = f2.B(f2.beta(s, s_o), f2.dbeta(s, s_o), m, s, N)
-    f_df = f.f_wo_visco(m,n,s,N,beta=f2.beta(s, s_o),geom='sph', dbeta = f2.beta(s, s_o))
+    f_df = f.f_wo_visco(m,n,s,N,beta=f2.beta(s, s_o),geom='sph', dbeta = f2.dbeta(s, s_o))
     eigenvalues2, eigenvectors2 = f2.eigvalues_shift_invert(A, B,f_df,n, N, v0, k=1)
     y2[i, :] = np.abs(eigenvalues2.real)
 

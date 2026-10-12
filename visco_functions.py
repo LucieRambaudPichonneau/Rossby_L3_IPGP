@@ -192,7 +192,7 @@ def A(beta, dbeta, ddbeta, dddbeta, m, s, N, Ek):
     bce2 = sp.csc_array(bce2.reshape(1,-1))
 
     D2 = sp.vstack([bci2, D2[1:-1,:], bce2], format = 'csc')      
-    fact2 = sp.diags([(1 /s[1:-1]**2 - 2*m**2/s[1:-1]**2 + 2*beta/s[1:-1] + dbeta) * 1j*Ek], offsets=[0], format = 'csc')
+    fact2 = sp.diags([(-1 /s[1:-1]**2 * (1+2*m**2) + 2*beta/s[1:-1] + 3*dbeta) * 1j*Ek], offsets=[0], format = 'csc')
     D2 = fact2 @ D2    
 
     
@@ -211,12 +211,12 @@ def A(beta, dbeta, ddbeta, dddbeta, m, s, N, Ek):
     bce1 = sp.csc_array(bce1.reshape(1,-1))
 
     D1 = sp.vstack([bci1, D1[1:-1,:], bce1], format = 'csc')
-    fact1 = sp.diags([(-2*m**2/s[1:-1]**3  + ddbeta + 1/s[1:-1]*dbeta - beta*m**2/s[1:-1]**2 + beta/s[1:-1]**2 + dbeta/s[1:-1]) * 1j*Ek], offsets=[0], format = 'csc')
+    fact1 = sp.diags([(1/s[1:-1]**3 * (1+2*m**2) + 3*ddbeta - beta/s[1:-1]**2*(m**2+1) + 4*dbeta/s[1:-1]) * 1j*Ek], offsets=[0], format = 'csc')
     D1 = fact1 @ D1
     
 
     #matrice non derivee
-    ui = 1j*Ek * (m**4/s[1:-1]**4 - beta*m**2/s[1:-1]**3 + 2*ddbeta/s[1:-1] + dbeta/s[1:-1]**2*(1-m**2) + dddbeta) + 2/s[1:-1]*beta*m
+    ui = 1j*Ek * (m**4/s[1:-1]**4 - 4*m**2/s[1:-1]**4 - beta*m**2/s[1:-1]**3 + beta/s[1:-1]**3 + 2*ddbeta/s[1:-1] - dbeta/s[1:-1]**2 + dbeta*m**2/s[1:-1]**2 + dddbeta) + 2/s[1:-1]*beta*m
     D = sp.diags([ui],offsets=[0], format = 'csc')
 
     A = D4 + D3 + D2 + D1 + D
@@ -265,12 +265,12 @@ def dbeta(s, s_o): #repris de mon code d'avant
 
 def ddbeta(s, s_o): 
     s = s[1:-1]
-    ddbeta = 2/(s_o**2-s**2) - 4*s*(s_o**4-s**4)/(s_o**2-s**2)**4
+    ddbeta = -2*s/(s_o**2-s**2)**2 - 4*s*(s_o**2+s**2)/(s_o**2-s**2)**3
     return ddbeta
 
 def dddbeta(s, s_o): 
     s = s[1:-1]
-    dddbeta = 4/(s_o**2-s**2)**4 * (s*(s_o**2-s**2)-(s_o**4-s**4)) - 4*s/(s_o**2-s**2)**8 * (-4*s**3 * (s_o**2-s**2)**4 + 8*s*(s_o**4-s**4)*(s_o**2-s**2))
+    dddbeta = -1/(s_o**2-s**2)**4 * (24*s**3+24*s_o**2*s**2-2) - 1/(s_o**2-s**2)**3 * (20*s**2+4*s_o**2)
     return dddbeta 
 
 def eigvalues_reg(A, B, N, n):
