@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import functions as f
+import Functions as f
 
 plt.rcParams.update({
     'font.size': 18,          
@@ -54,7 +54,7 @@ for i, m in enumerate(m_array):
     A, B = f.AB4(s, m, N, f.beta(s, s_o), f.dbeta_ds(s, s_o))  # sans l'approx sur beta
     eigenvalues, eigenvectors = f.eigvalues_reg(A, B, N, n)
     y[i, :] = np.abs(eigenvalues.real)
-    
+
 for k in range(1, n + 1):
     ax2.scatter(m_array, y[:, k-1], marker='x', label=r'$n={}$'.format(k))
     
