@@ -10,11 +10,18 @@ s = np.linspace(s_i, s_o, N)  # definition grille
 Ek = 10**-4 #nombre d'Ekman
 
 m_array = np.arange(1, 51, 1)
-n = 5  # nombre onde radial (nombre eigenvectors/values)
+n = 1  # nombre onde radial (nombre eigenvectors/values)
+m=32 
 v0 = np.ones(N-2, dtype=complex)
 
 beta0 = f.beta0(s_i, s_o)
 
+#calcul de l'eigenvalue pour verification
+A,B=f2.matrices_visqueuses(s, m, N, f2.beta(s, s_o), f2.dbeta(s, s_o), f2.ddbeta(s,s_o), f2.dddbeta(s, s_o), Ek)
+f_df = -0.0303631382226775-0.366650384167303j
+eigenvalue, eigenvector = f2.eigvalues_shift_invert(A, B,f_df,n, N, v0, k=1)
+print(eigenvalue)
+'''
 #beta lineaire, f(s)=pulsation avec et sans visco, pour n=1,...,5 (partie reelle)
 fig, ax = plt.subplots(1, 1, figsize=(13, 7))
 y = np.empty((len(m_array), n))
@@ -127,7 +134,7 @@ fig.tight_layout()
 fig.savefig("beta_spherique_avec_visco_Im.pdf", bbox_inches='tight')
 
 
-'''
+
 fig, ax = plt.subplots(1, 1, figsize=(10,7))
 A = f.A(f.beta(s, s_o), f.dbeta(s, s_o), f.ddbeta(s,s_o), f.dddbeta(s, s_o), m, s, N, Ek)  # sans l'approx sur beta
 B = f.B(f.beta(s, s_o), f.dbeta(s, s_o), m, s, N)
@@ -167,5 +174,6 @@ for i, m_val in enumerate(np.array([1, 10, 20, 30])):
 
 fig.tight_layout()
 fig.savefig("donuts_spheriques.png", dpi=300, bbox_inches='tight')
-'''
+
 plt.show()
+'''
