@@ -122,13 +122,16 @@ def B2(s, m, N):
     B = D2 + D1 + D  # Matrice B à utiliser pour solve le problème (lhs)
 
     return B
-'''
+
+
 #construction de la matrice A en rajoutant tous les termes visqueux 
 def A(beta, dbeta, ddbeta, dddbeta, m, s, N, Ek):
     ds = (s[-1] - s[0]) / (N - 1)
 
     #matrice derivee quatrieme
     ui4 = np.full(N-2, 6 / ds**4)
+    ui4[0]= 7 / ds**4
+    ui4[-1]= 7 / ds**4
     uiv4 = np.full(N-3, -4 / ds**4)
     uivv4 = np.full(N-4, 1 / ds**4)  
     D4 = sp.diags([uivv4,uiv4,ui4,uiv4,uivv4], offsets=[-2,-1,0,1,2], format = 'csc')
@@ -216,7 +219,7 @@ def A(beta, dbeta, ddbeta, dddbeta, m, s, N, Ek):
     
 
     #matrice non derivee
-    ui = 1j*Ek * (m**4/s[1:-1]**4 - 4*m**2/s[1:-1]**4 - beta*m**2/s[1:-1]**3 + beta/s[1:-1]**3 + 2*ddbeta/s[1:-1] - dbeta/s[1:-1]**2 + dbeta*m**2/s[1:-1]**2 + dddbeta) + 2/s[1:-1]*beta*m
+    ui = 1j*Ek * (1/s[1:-1]**4*(m**4-4*m**2) + beta/s[1:-1]**3*(1-m**2) - dbeta/s[1:-1]**2*(m**2+1) + 2*ddbeta/s[1:-1] + dddbeta) + 2/s[1:-1]*beta*m
     D = sp.diags([ui],offsets=[0], format = 'csc')
 
     A = D4 + D3 + D2 + D1 + D
@@ -242,77 +245,6 @@ def B(beta, dbeta, m,s, N):
     B = D2 + D1 + D  # Matrice B à utiliser pour solve le problème (lhs)
 
     return B
-'''
-def matrices_visqueuses(s, m, N, beta, dbeta, ddbeta, dddbeta, Ek):
-    ds = (s[-1] - s[0]) / (N - 1)
-    n_int = N - 2  # Nombre de points intérieurs
-    s_int = s[1:-1]
-
-    # --- D4 (ordre 4) avec Psi_0 = 0 et Psi_{-1} = Psi_1 ---
-    ui4 = np.full(n_int, 6.0 / ds**4)
-    uiv4 = np.full(n_int - 1, -4.0 / ds**4)
-    uivv4 = np.full(n_int - 2, 1.0 / ds**4)
-    D4 = sp.diags([uivv4, uiv4, ui4, uiv4, uivv4], offsets=[-2, -1, 0, 1, 2], shape=(n_int, n_int), format='lil')
-    # Bords avec points fantômes :
-    D4[0, 0] = 7.0 / ds**4
-    D4[-1, -1] = 7.0 / ds**4
-    D4 = D4.tocsc()
-
-    # --- D3 (ordre 3) avec Psi_0 = 0 et Psi_{-1} = Psi_1 ---
-    uiv3 = np.full(n_int - 1, 2.0 / (2.0 * ds**3))
-    uivv3 = np.full(n_int - 2, -1.0 / (2.0 * ds**3))
-    D3 = sp.diags([uivv3, uiv3, -uiv3, -uivv3], offsets=[-2, -1, 1, 2], shape=(n_int, n_int), format='lil')
-    D3[0, 0] = -1.0 / (2.0 * ds**3)
-    D3[-1, -1] = 1.0 / (2.0 * ds**3)
-    D3 = D3.tocsc()
-
-    # --- D2 (ordre 2) avec Psi_0 = 0 et Psi_{N-1} = 0 ---
-    ui2 = np.full(n_int, -2.0 / ds**2)
-    uiv2 = np.full(n_int - 1, 1.0 / ds**2)
-    D2 = sp.diags([uiv2, ui2, uiv2], offsets=[-1, 0, 1], shape=(n_int, n_int), format='csc')
-
-    # --- D1 (ordre 1) avec Psi_0 = 0 et Psi_{N-1} = 0 ---
-    uiv1 = np.full(n_int - 1, 1.0 / (2.0 * ds))
-    D1 = sp.diags([-uiv1, uiv1], offsets=[-1, 1], shape=(n_int, n_int), format='csc')
-
-    # Facteurs dépendants de s (exactement les formules du prof !)
-    c4 = 1.0
-    c3 = beta + 2.0 / s_int
-    c2 = 3.0 * dbeta + 2.0 * beta / s_int - (1.0 + 2.0 * m**2) / s_int**2
-    c1 = (
-        (1.0 + 2.0 * m**2) / s_int**3
-        + 3.0 * ddbeta
-        - (m**2 + 1.0) * beta / s_int**2
-        + 4.0 * dbeta / s_int
-    )
-    c0 = (
-        (m**4 - 4.0 * m**2) / s_int**4
-        + (1.0 - m**2) * beta / s_int**3
-        - (m**2 + 1.0) * dbeta / s_int**2
-        + 2.0 * ddbeta / s_int
-        + dddbeta
-    )
-
-    # Assemblage de l'opérateur visqueux complet
-    # L_visc = c4*D4 + c3*D3 + c2*D2 + c1*D1 + c0*Id
-    F4 = sp.diags([c4], offsets=[0], shape=(n_int, n_int), format='csc')
-    F3 = sp.diags([c3], offsets=[0], shape=(n_int, n_int), format='csc')
-    F2 = sp.diags([c2], offsets=[0], shape=(n_int, n_int), format='csc')
-    F1 = sp.diags([c1], offsets=[0], shape=(n_int, n_int), format='csc')
-    F0 = sp.diags([c0], offsets=[0], shape=(n_int, n_int), format='csc')
-
-    L_visc = F4 @ D4 + F3 @ D3 + F2 @ D2 + F1 @ D1 + F0
-
-    # Matrice A totale : i*Ek * L_visc + terme de Rossby
-    rossby = sp.diags([2.0 * m * beta / s_int], offsets=[0], shape=(n_int, n_int), format='csc')
-    A = 1j * Ek * L_visc + rossby
-
-    # Matrice B (LHS) : D2 + (1/s + beta)*D1 + (beta/s + dbeta - m^2/s^2)*Id
-    fact_B1 = sp.diags([1.0 / s_int + beta], offsets=[0], shape=(n_int, n_int), format='csc')
-    fact_B0 = sp.diags([beta / s_int + dbeta - m**2 / s_int**2], offsets=[0], shape=(n_int, n_int), format='csc')
-    B = D2 + fact_B1 @ D1 + fact_B0
-
-    return A, B
 
 def beta0(s_i, s_o): 
     # Quand beta est lineaire, dbeta_ds=beta0 
@@ -340,7 +272,7 @@ def ddbeta(s, s_o):
 
 def dddbeta(s, s_o): 
     s = s[1:-1]
-    dddbeta = -1/(s_o**2-s**2)**4 * (24*s**3+24*s_o**2*s**2-2) - 1/(s_o**2-s**2)**3 * (20*s**2+4*s_o**2)
+    dddbeta = -(2/(s_o**2-s**2)**2 + (20*s**2+4*s_o**2)/(s_o**2-s**2)**3 + 24*s**2*(s_o**2+s**2)/(s_o**2-s**2)**4)
     return dddbeta 
 
 def eigvalues_reg(A, B, N, n):
