@@ -5,7 +5,7 @@ import Functions as f
 
 s_i = 4  # rayon interne couche fluide
 s_o = 5  # rayon externe couche fluide
-N = 500  # resolution
+N = 2000  # resolution
 s = np.linspace(s_i, s_o, N)  # definition grille
 Ek = 10**-4 #nombre d'Ekman
 
@@ -13,14 +13,15 @@ m_array = np.arange(1, 51, 1)
 n = 5  # nombre onde radial (nombre eigenvectors/values)
 
 beta0 = f.beta0(s_i, s_o)
-'''
+
+
 #calcul de l'eigenvalue pour verification
-A=f2.A(f2.beta(s, s_o), f2.dbeta(s, s_o), f2.ddbeta(s,s_o), f2.dddbeta(s, s_o),m,s,N, Ek)
-B=f2.B(f2.beta(s, s_o), f2.dbeta(s, s_o),m,s,N)
-f_df = 0.366650384167303-0.0303631382226775j
-eigenvalue, eigenvector = f2.eigvalues_shift_invert(A, B,f_df,n, N, k=1)
+A=f2.A(f2.beta(s, s_o), f2.dbeta(s, s_o), f2.ddbeta(s,s_o), f2.dddbeta(s, s_o),m=32,s=s,N=N, Ek=Ek)
+B=f2.B(f2.beta(s, s_o), f2.dbeta(s, s_o),m=32,s=s,N=N)
+eigenvalue, eigenvector = f2.eigvalues_shift_invert(A, B,f_df=0.366650384167303-0.0303631382226775j,n=1, N=N, k=1)
 print(eigenvalue)
-'''
+
+
 #beta lineaire, f(s)=pulsation avec et sans visco, pour n=1,...,5 (partie reelle)
 fig, ax = plt.subplots(1, 1, figsize=(13, 7))
 y = np.empty((len(m_array), n))
@@ -133,7 +134,7 @@ fig.tight_layout()
 fig.savefig("beta_spherique_avec_visco_Im.pdf", bbox_inches='tight')
 
 
-
+'''
 fig, ax = plt.subplots(1, 1, figsize=(10,7))
 A = f2.A(f2.beta(s, s_o), f2.dbeta(s, s_o), f2.ddbeta(s,s_o), f2.dddbeta(s, s_o), m, s, N, Ek)  # sans l'approx sur beta
 B = f2.B(f2.beta(s, s_o), f2.dbeta(s, s_o), m, s, N)
@@ -142,6 +143,7 @@ eigenvalues, eigenvectors = f2.eigvalues_shift_invert(A, B,f_df,n, N, k=2)
 for k in range(1, n + 1):
     ax.plot(s,eigenvectors[:, k-1].real,label=r'$n={}$ numerical'.format(k))
 ax.legend()
+'''
 
 # Plot 2D pour m=1,10,20,30 et n=1 --> solution sphérique
 N_phi = 512

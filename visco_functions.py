@@ -201,11 +201,14 @@ def eigvalues_shift_invert(A, B, f_df,n, N, k=1):
     M = np.linalg.solve(B.toarray(), A.toarray())
     eigvals = np.zeros(n, dtype=complex)
     eigvecs = np.zeros((N, n), dtype=complex)
-    l = 0 #correction que je set à 0 de base 
-    for i, f in enumerate(f_df):
-        vpc = f + l       #valeur propre complexe    
-        val, vec = eigs(M, k=k, sigma=vpc, which='LM')       
-        eigvals[i] = val[0]
-        eigvecs[1:-1, i] = vec[:, 0]
-        l = eigvals[i] - f       
+    l = 0 #correction que je set à 0 de base
+    if type(f_df)==np.ndarray: 
+        for i, f in enumerate(f_df):
+            vpc = f + l       #valeur propre complexe    
+            val, vec = eigs(M, k=k, sigma=vpc, which='LM')       
+            eigvals[i] = val[0]
+            eigvecs[1:-1, i] = vec[:, 0]
+            l = eigvals[i] - f
+    elif type(f_df)==complex: 
+        eigvals, eigvecs = eigs(M, k=k, sigma=f_df, which='LM')      
     return eigvals, eigvecs
