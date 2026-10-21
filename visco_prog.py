@@ -10,16 +10,15 @@ s = np.linspace(s_i, s_o, N)  # definition grille
 Ek = 10**-4 #nombre d'Ekman
 
 m_array = np.arange(1, 51, 1)
-n = 1  # nombre onde radial (nombre eigenvectors/values)
-m=32 
-v0 = np.ones(N-2, dtype=complex)
+n = 5  # nombre onde radial (nombre eigenvectors/values)
 
 beta0 = f.beta0(s_i, s_o)
-
+'''
 #calcul de l'eigenvalue pour verification
-A,B=f2.matrices_visqueuses(s, m, N, f2.beta(s, s_o), f2.dbeta(s, s_o), f2.ddbeta(s,s_o), f2.dddbeta(s, s_o), Ek)
-f_df = -0.0303631382226775-0.366650384167303j
-eigenvalue, eigenvector = f2.eigvalues_shift_invert(A, B,f_df,n, N, v0, k=1)
+A=f2.A(f2.beta(s, s_o), f2.dbeta(s, s_o), f2.ddbeta(s,s_o), f2.dddbeta(s, s_o),m,s,N, Ek)
+B=f2.B(f2.beta(s, s_o), f2.dbeta(s, s_o),m,s,N)
+f_df = 0.366650384167303-0.0303631382226775j
+eigenvalue, eigenvector = f2.eigvalues_shift_invert(A, B,f_df,n, N, k=1)
 print(eigenvalue)
 '''
 #beta lineaire, f(s)=pulsation avec et sans visco, pour n=1,...,5 (partie reelle)
@@ -34,8 +33,8 @@ y2 = np.empty((len(m_array),n))
 for i, m in enumerate(m_array): #avec visco_functions
     A = f2.A2(s, m, N, beta0, Ek)
     B = f2.B2(s, m, N)
-    f_df = f.f_wo_visco(m,n,s,N,beta=beta0,geom='lin')
-    eigenvalues2, eigenvectors2 = f2.eigvalues_shift_invert(A, B,f_df,n, N, v0, k=1)
+    f_df = f.f_wo_visco(m,n,s,N,beta=beta0*s[1:-1],geom='lin')
+    eigenvalues2, eigenvectors2 = f2.eigvalues_shift_invert(A, B,f_df,n, N, k=1)
     y2[i, :] = np.abs(eigenvalues2.real)
 
     
@@ -67,7 +66,7 @@ for i, m in enumerate(m_array): #avec visco_functions
     A = f2.A(f2.beta(s, s_o), f2.dbeta(s, s_o), f2.ddbeta(s,s_o), f2.dddbeta(s, s_o), m, s, N, Ek)
     B = f2.B(f2.beta(s, s_o), f2.dbeta(s, s_o), m, s, N)
     f_df = f.f_wo_visco(m,n,s,N,beta=f2.beta(s, s_o),geom='sph', dbeta = f2.dbeta(s, s_o))
-    eigenvalues2, eigenvectors2 = f2.eigvalues_shift_invert(A, B,f_df,n, N, v0, k=1)
+    eigenvalues2, eigenvectors2 = f2.eigvalues_shift_invert(A, B,f_df,n, N, k=1)
     y2[i, :] = np.abs(eigenvalues2.real)
 
 for k in range(1, n + 1):
@@ -93,7 +92,7 @@ for i, m in enumerate(m_array): #avec visco_functions
     A = f2.A2(s, m, N, beta0, Ek)
     B = f2.B2(s, m, N)
     f_df = f.f_wo_visco(m,n,s,N,beta=beta0,geom='lin')
-    eigenvalues2, eigenvectors2 = f2.eigvalues_shift_invert(A, B,f_df,n, N, v0, k=1)
+    eigenvalues2, eigenvectors2 = f2.eigvalues_shift_invert(A, B,f_df,n, N, k=1)
     y[i, :] = np.abs(eigenvalues2.imag)
 
 for k in range(1, n + 1):
@@ -116,8 +115,8 @@ y = np.empty((len(m_array),n))
 for i, m in enumerate(m_array): #avec visco_functions
     A = f2.A(f2.beta(s, s_o), f2.dbeta(s, s_o), f2.ddbeta(s,s_o), f2.dddbeta(s, s_o), m, s, N, Ek)
     B = f2.B(f2.beta(s, s_o), f2.dbeta(s, s_o), m, s, N)
-    f_df = f.f_wo_visco(m,n,s,N,beta=f2.beta(s, s_o),geom='sph', dbeta = f2.beta(s, s_o))
-    eigenvalues2, eigenvectors2 = f2.eigvalues_shift_invert(A, B,f_df,n, N, v0, k=1)
+    f_df = f.f_wo_visco(m,n,s,N,beta=f2.beta(s, s_o),geom='sph', dbeta = f2.dbeta(s, s_o))
+    eigenvalues2, eigenvectors2 = f2.eigvalues_shift_invert(A, B,f_df,n, N, k=1)
     y[i, :] = np.abs(eigenvalues2.imag)
 
 for k in range(1, n + 1):
@@ -136,9 +135,9 @@ fig.savefig("beta_spherique_avec_visco_Im.pdf", bbox_inches='tight')
 
 
 fig, ax = plt.subplots(1, 1, figsize=(10,7))
-A = f.A(f.beta(s, s_o), f.dbeta(s, s_o), f.ddbeta(s,s_o), f.dddbeta(s, s_o), m, s, N, Ek)  # sans l'approx sur beta
-B = f.B(f.beta(s, s_o), f.dbeta(s, s_o), m, s, N)
-eigenvalues, eigenvectors = f.eigvalues_shift_invert(A, B,f_df,n, N, v0, k=2)
+A = f2.A(f2.beta(s, s_o), f2.dbeta(s, s_o), f2.ddbeta(s,s_o), f2.dddbeta(s, s_o), m, s, N, Ek)  # sans l'approx sur beta
+B = f2.B(f2.beta(s, s_o), f2.dbeta(s, s_o), m, s, N)
+eigenvalues, eigenvectors = f2.eigvalues_shift_invert(A, B,f_df,n, N, k=2)
 
 for k in range(1, n + 1):
     ax.plot(s,eigenvectors[:, k-1].real,label=r'$n={}$ numerical'.format(k))
@@ -156,9 +155,9 @@ fig.suptitle(r'2D Eigenmodes (spherical $\beta$)', fontsize=18)
 axflat = ax.flatten()
 
 for i, m_val in enumerate(np.array([1, 10, 20, 30])):
-    A = f.A(f.beta(s, s_o), f.dbeta(s, s_o), f.ddbeta(s,s_o), f.dddbeta(s, s_o), m_val, s, N, Ek)  # sans l'approx sur beta
-    B = f.B(f.beta(s, s_o), f.dbeta(s, s_o), m_val, s, N)
-    eigenvalues, eigenvectors = f.eigvalues_shift_invert(A, B,f_df,n, N,v0, k=2)
+    A = f2.A(f2.beta(s, s_o), f2.dbeta(s, s_o), f2.ddbeta(s,s_o), f2.dddbeta(s, s_o), m_val, s, N, Ek)  # sans l'approx sur beta
+    B = f2.B(f2.beta(s, s_o), f2.dbeta(s, s_o), m_val, s, N)
+    eigenvalues, eigenvectors = f2.eigvalues_shift_invert(A, B,f_df,n, N, k=2)
     psi =np.real(np.outer(eigenvectors[:, 0], np.exp(1j * m_val * phi))) 
     
     axflat[i].contourf(x_grid, y_grid, psi, levels=15, cmap='RdBu_r')
@@ -176,4 +175,4 @@ fig.tight_layout()
 fig.savefig("donuts_spheriques.png", dpi=300, bbox_inches='tight')
 
 plt.show()
-'''
+
