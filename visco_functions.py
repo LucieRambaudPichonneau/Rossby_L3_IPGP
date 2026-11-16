@@ -72,7 +72,7 @@ def B2(s, m, N):
 
 
 #construction de la matrice A en rajoutant tous les termes visqueux 
-def A(beta, dbeta, ddbeta, dddbeta, m, s, N, Ek):
+def A(beta, dbeta, ddbeta, dddbeta, m, s, N, Ek, s_o):
     ds = (s[-1] - s[0]) / (N - 1)
 
     #matrice derivee quatrieme
@@ -99,19 +99,19 @@ def A(beta, dbeta, ddbeta, dddbeta, m, s, N, Ek):
     ui2 = np.full(N-2, -2 / ds**2)
     uiv2 = np.full(N-3, 1 / ds**2)
     D2 = sp.diags([uiv2,ui2,uiv2],offsets=[-1,0,1], format = 'csc')    
-    fact2 = sp.diags([(-1 /s[1:-1]**2 * (1+2*m**2) + 2*beta/s[1:-1] + 3*dbeta) * 1j*Ek], offsets=[0], format = 'csc')
+    fact2 = sp.diags([(-1 /s[1:-1]**2 * (1+2*m**2) + 2*beta/s[1:-1] + 3*dbeta + (s_o/(Ek*(s_o**2-s[1:-1]**2)**(3/2)))**(1/2) ) * 1j*Ek], offsets=[0], format = 'csc')
     D2 = fact2 @ D2    
 
     
     #matrice derivee premiere 
     uiv1 = np.full(N-3, 1 / (2*ds))
     D1 = sp.diags([-uiv1,uiv1], offsets = [-1,1], format = 'csc')
-    fact1 = sp.diags([(1/s[1:-1]**3 * (1+2*m**2) + 3*ddbeta - beta/s[1:-1]**2*(m**2+1) + 4*dbeta/s[1:-1]) * 1j*Ek], offsets=[0], format = 'csc')
+    fact1 = sp.diags([(1/s[1:-1]**3 * (1+2*m**2) + 3*ddbeta - beta/s[1:-1]**2*(m**2+1) + 4*dbeta/s[1:-1] + (s_o/(Ek*(s_o**2-s[1:-1]**2)**(3/2)))**(1/2) * (1/s[1:-1] + beta + s[1:-1]/(2*(s_o**2-s[1:-1]**2))) ) * 1j*Ek], offsets=[0], format = 'csc')
     D1 = fact1 @ D1
     
 
     #matrice non derivee
-    ui = 1j*Ek * (1/s[1:-1]**4*(m**4-4*m**2) + beta/s[1:-1]**3*(1-m**2) - dbeta/s[1:-1]**2*(m**2+1) + 2*ddbeta/s[1:-1] + dddbeta) + 2/s[1:-1]*beta*m
+    ui = 1j*Ek * (1/s[1:-1]**4*(m**4-4*m**2) + beta/s[1:-1]**3*(1-m**2) - dbeta/s[1:-1]**2*(m**2+1) + 2*ddbeta/s[1:-1] + dddbeta + (s_o/(Ek*(s_o**2-s[1:-1]**2)**(3/2)))**(1/2) * (beta/s[1:-1] + dbeta - m**2/s[1:-1]**2 + s[1:-1]*beta/(2*(s_o**2-s[1:-1]**2)) + m**2/(s_o**2-s[1:-1]**2))) + 2/s[1:-1]*beta*m - 2*m/(s_o**2-s[1:-1]**2) - 5/2*s_o*m/(s_o**2-s[1:-1]**2)**(3/2)*(s_o/(Ek*(s_o**2-s[1:-1]**2)**(3/2)))**(1/2)
     D = sp.diags([ui],offsets=[0], format = 'csc')
 
     A = D4 + D3 + D2 + D1 + D

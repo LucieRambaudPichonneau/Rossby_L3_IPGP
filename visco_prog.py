@@ -15,10 +15,11 @@ n = 5  # nombre onde radial (nombre eigenvectors/values)
 beta0 = f.beta0(s_i, s_o)
 
 #calcul de l'eigenvalue pour verification
-A=f2.A(f2.beta(s, s_o), f2.dbeta(s, s_o), f2.ddbeta(s,s_o), f2.dddbeta(s, s_o),m=32,s=s,N=N, Ek=Ek)
+A=f2.A(f2.beta(s, s_o), f2.dbeta(s, s_o), f2.ddbeta(s,s_o), f2.dddbeta(s, s_o),m=32,s=s,N=N, Ek=Ek, s_o=s_o)
 B=f2.B(f2.beta(s, s_o), f2.dbeta(s, s_o),m=32,s=s,N=N)
 f_df = np.full(1,0.366650384167303)
 eigenvalue, eigenvector = f2.eigvalues_shift_invert(A, B,f_df,n=1, N=N, k=1)
+
 
 ref = np.load('lambda_ref.npz')['arr_0']
 
@@ -69,7 +70,7 @@ for i, m in enumerate(m_array):
 
 y2 = np.empty((len(m_array),n))
 for i, m in enumerate(m_array): #avec visco_functions
-    A = f2.A(f2.beta(s, s_o), f2.dbeta(s, s_o), f2.ddbeta(s,s_o), f2.dddbeta(s, s_o), m, s, N, Ek)
+    A = f2.A(f2.beta(s, s_o), f2.dbeta(s, s_o), f2.ddbeta(s,s_o), f2.dddbeta(s, s_o), m, s, N, Ek, s_o)
     B = f2.B(f2.beta(s, s_o), f2.dbeta(s, s_o), m, s, N)
     f_df = f.f_wo_visco(m,n,s,N,beta=f2.beta(s, s_o),geom='sph', dbeta = f2.dbeta(s, s_o))
     eigenvalues2, eigenvectors2 = f2.eigvalues_shift_invert(A, B,f_df,n, N, k=1)
@@ -119,7 +120,7 @@ fig.savefig("beta_lineaire_avec_visco_Im.pdf", bbox_inches='tight')
 fig, ax = plt.subplots(1, 1, figsize=(13, 7))
 y = np.empty((len(m_array),n))
 for i, m in enumerate(m_array): #avec visco_functions
-    A = f2.A(f2.beta(s, s_o), f2.dbeta(s, s_o), f2.ddbeta(s,s_o), f2.dddbeta(s, s_o), m, s, N, Ek)
+    A = f2.A(f2.beta(s, s_o), f2.dbeta(s, s_o), f2.ddbeta(s,s_o), f2.dddbeta(s, s_o), m, s, N, Ek, s_o)
     B = f2.B(f2.beta(s, s_o), f2.dbeta(s, s_o), m, s, N)
     f_df = f.f_wo_visco(m,n,s,N,beta=f2.beta(s, s_o),geom='sph', dbeta = f2.dbeta(s, s_o))
     eigenvalues2, eigenvectors2 = f2.eigvalues_shift_invert(A, B,f_df,n, N, k=1)
@@ -141,7 +142,7 @@ fig.savefig("beta_spherique_avec_visco_Im.pdf", bbox_inches='tight')
 
 
 fig, ax = plt.subplots(1, 1, figsize=(10,7))
-A = f2.A(f2.beta(s, s_o), f2.dbeta(s, s_o), f2.ddbeta(s,s_o), f2.dddbeta(s, s_o), m, s, N, Ek)  # sans l'approx sur beta
+A = f2.A(f2.beta(s, s_o), f2.dbeta(s, s_o), f2.ddbeta(s,s_o), f2.dddbeta(s, s_o), m, s, N, Ek, s_o)  # sans l'approx sur beta
 B = f2.B(f2.beta(s, s_o), f2.dbeta(s, s_o), m, s, N)
 eigenvalues, eigenvectors = f2.eigvalues_shift_invert(A, B,f_df,n, N, k=2)
 
@@ -161,7 +162,7 @@ fig.suptitle(r'2D Eigenmodes (spherical $\beta$)', fontsize=18)
 axflat = ax.flatten()
 
 for i, m_val in enumerate(np.array([1, 10, 20, 30])):
-    A = f2.A(f2.beta(s, s_o), f2.dbeta(s, s_o), f2.ddbeta(s,s_o), f2.dddbeta(s, s_o), m_val, s, N, Ek)  # sans l'approx sur beta
+    A = f2.A(f2.beta(s, s_o), f2.dbeta(s, s_o), f2.ddbeta(s,s_o), f2.dddbeta(s, s_o), m_val, s, N, Ek, s_o)  # sans l'approx sur beta
     B = f2.B(f2.beta(s, s_o), f2.dbeta(s, s_o), m_val, s, N)
     eigenvalues, eigenvectors = f2.eigvalues_shift_invert(A, B,f_df,n, N, k=2)
     psi =np.real(np.outer(eigenvectors[:, 0], np.exp(1j * m_val * phi))) 
